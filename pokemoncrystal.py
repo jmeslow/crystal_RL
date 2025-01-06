@@ -4,6 +4,7 @@ from pyboy.utils import WindowEvent
 import numpy as np
 from skimage.transform import downscale_local_mean
 
+
 class crystalenv(Env):
 
     def __init__(self):
@@ -52,7 +53,6 @@ class crystalenv(Env):
 
         self.step_count = 0
         self.recent_screens = np.zeros(self.obs_dims,dtype=np.uint8)
-
         self.seen_coords = {}
         return self.get_observation(), {}
     
@@ -62,7 +62,6 @@ class crystalenv(Env):
         current_reward = self.update_reward()
         obs = self.get_observation()
         self.step_count += 1
-
         self.update_seen_coords()
         truncated = self.step_count >= self.step_threshold
         
@@ -76,7 +75,6 @@ class crystalenv(Env):
 
         observation = {
             "screens": self.recent_screens,
-            "party_level":np.array(level_sum,np.float32)
             "party_level":np.array(level_sum,np.float32),
             "pokemon_health":np.array([self.get_health()]),
             #Convert 2 digit hex to 8 bit value (gym badges are stored as 8 binary switches)
@@ -89,7 +87,6 @@ class crystalenv(Env):
     def update_reward(self):
         #TODO add other rewards
         scores = {
-            "level" : self.get_level_sum()
             "level" : self.get_level_sum(),
             "health": self.get_health(),
             "coord_explore":0.1 * self.get_coord_reward(),
@@ -105,10 +102,6 @@ class crystalenv(Env):
 
     #TODO create health observation space and introduce it into reward calculation
     def get_health(self):
-        cur_array = [self.read_mem(x) for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
-
-        total_health = [max(self.read_mem(x),1) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
-        
         cur_array = [self.read_mem(x) + self.read_mem(x-1) * 256 for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
         total_health = [max(self.read_mem(x) + self.read_mem(x-1) * 256,1) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
         # Return health proportion as single value
@@ -122,7 +115,7 @@ class crystalenv(Env):
     
     def run_action_on_emulator(self,action):
         self.pyboy.send_input(self.valid_actions[action])
-        # Tick emulation 8 times with button pressed and 7 with it released
+        # Tick emulation 8 times with button pressed and 8 with it released
         # Update screen on 8th 'release' tick
         action_ticks = 8
         self.pyboy.tick(action_ticks,False)
@@ -131,7 +124,6 @@ class crystalenv(Env):
         self.pyboy.tick(action_ticks-1, False)
         self.pyboy.tick(1)
 
-   
     def update_seen_coords(self):
         Map, X, Y = [self.read_mem(x) for x in [0xDCB6, 0xDCB7, 0xDCB8]]
         key = f"{Map}, {X}, {Y}" 
