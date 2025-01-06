@@ -35,10 +35,9 @@ class crystalenv(Env):
             # red experiments considers 3 most recent 'seen' screens
             "screens":spaces.Box(low = 0, high = 255, shape = self.obs_dims,dtype=np.uint8), 
             # red experiments uses 8 fourier terms calculated from the sum of party levels the observation space for pokemon levels
-            "party_level":spaces.Box(low=-1,high=1, shape = (8,))#
-            #,"pokemon_health":spaces.Box(low=0,high=1, shape = (6,))        
             "party_level":spaces.Box(low=-1,high=1, shape = (8,))
             ,"pokemon_health":spaces.Box(low=0,high=1),
+            "johto_gym_badges":spaces.MultiBinary(8)
             #,"map_explore": spaces.Box(low=0,high=255)
             #"box_space":spaces.Box(low=0,high=100,shape=(12*20,))
             #badge space?
@@ -80,6 +79,9 @@ class crystalenv(Env):
             "party_level":np.array(level_sum,np.float32)
             "party_level":np.array(level_sum,np.float32),
             "pokemon_health":np.array([self.get_health()]),
+            #Convert 2 digit hex to 8 bit value (gym badges are stored as 8 binary switches)
+            "johto_gym_badges":np.array(self.get_gym_badges(),dtype=np.int8)
+
         }
 
         return observation
@@ -91,12 +93,16 @@ class crystalenv(Env):
             "level" : self.get_level_sum(),
             "health": self.get_health(),
             "coord_explore":0.1 * self.get_coord_reward(),
+            "gym_badges":10 * sum(self.get_gym_badges())
         }
         return sum([val for _,val in scores.items()])
 
     def close(self):
         self.pyboy.stop()
     
+    def get_gym_badges(self):
+        return [int(x) for x in f"{self.read_mem(0xD857):08b}"]
+
     #TODO create health observation space and introduce it into reward calculation
     def get_health(self):
         cur_array = [self.read_mem(x) for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
