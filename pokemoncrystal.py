@@ -54,6 +54,7 @@ class crystalenv(Env):
         self.step_count = 0
         self.recent_screens = np.zeros(self.obs_dims,dtype=np.uint8)
 
+        self.seen_coords = {}
         return self.get_observation(), {}
     
     def step(self,action):
@@ -63,6 +64,7 @@ class crystalenv(Env):
         obs = self.get_observation()
         self.step_count += 1
 
+        self.update_seen_coords()
         truncated = self.step_count >= self.step_threshold
         
         return obs,current_reward,False,truncated, {}
@@ -88,6 +90,7 @@ class crystalenv(Env):
             "level" : self.get_level_sum()
             "level" : self.get_level_sum(),
             "health": self.get_health(),
+            "coord_explore":0.1 * self.get_coord_reward(),
         }
         return sum([val for _,val in scores.items()])
 
@@ -123,6 +126,17 @@ class crystalenv(Env):
         self.pyboy.tick(1)
 
    
+    def update_seen_coords(self):
+        Map, X, Y = [self.read_mem(x) for x in [0xDCB6, 0xDCB7, 0xDCB8]]
+        key = f"{Map}, {X}, {Y}" 
+        if key in self.seen_coords:
+            self.seen_coords[key] += 1
+        else:
+            self.seen_coords[key] = 1
+
+    def get_coord_reward(self):
+        return len(self.seen_coords)
+
     def fourier_transform(self,value):
         return np.sin(value * 2 ** np.arange(8))
     
