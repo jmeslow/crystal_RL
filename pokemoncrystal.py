@@ -37,6 +37,8 @@ class crystalenv(Env):
             # red experiments uses 8 fourier terms calculated from the sum of party levels the observation space for pokemon levels
             "party_level":spaces.Box(low=-1,high=1, shape = (8,))#
             #,"pokemon_health":spaces.Box(low=0,high=1, shape = (6,))        
+            "party_level":spaces.Box(low=-1,high=1, shape = (8,))
+            ,"pokemon_health":spaces.Box(low=0,high=1),
             #,"map_explore": spaces.Box(low=0,high=255)
             #"box_space":spaces.Box(low=0,high=100,shape=(12*20,))
             #badge space?
@@ -74,6 +76,8 @@ class crystalenv(Env):
         observation = {
             "screens": self.recent_screens,
             "party_level":np.array(level_sum,np.float32)
+            "party_level":np.array(level_sum,np.float32),
+            "pokemon_health":np.array([self.get_health()]),
         }
 
         return observation
@@ -82,6 +86,8 @@ class crystalenv(Env):
         #TODO add other rewards
         scores = {
             "level" : self.get_level_sum()
+            "level" : self.get_level_sum(),
+            "health": self.get_health(),
         }
         return sum([val for _,val in scores.items()])
 
@@ -94,6 +100,10 @@ class crystalenv(Env):
 
         total_health = [max(self.read_mem(x),1) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
         
+        cur_array = [self.read_mem(x) + self.read_mem(x-1) * 256 for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
+        total_health = [max(self.read_mem(x) + self.read_mem(x-1) * 256,1) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
+        # Return health proportion as single value
+        return sum(cur_array) / sum(total_health)
 
     def get_level_sum(self):
         min_poke_level = 2
