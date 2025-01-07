@@ -54,18 +54,20 @@ class crystalenv(Env):
         self.step_count = 0
         self.recent_screens = np.zeros(self.obs_dims,dtype=np.uint8)
         self.seen_coords = {}
+        self.reward = self.update_reward()
         return self.get_observation(), {}
     
     def step(self,action):
         self.run_action_on_emulator(action)
         
-        current_reward = self.update_reward()
+        step_reward = self.update_reward() - self.reward
+        self.reward = self.update_reward()
         obs = self.get_observation()
         self.step_count += 1
         self.update_seen_coords()
         truncated = self.step_count >= self.step_threshold
         
-        return obs,current_reward,False,truncated, {}
+        return obs,step_reward,False,truncated, {}
     
     def get_observation(self):
         screen = self.get_screen()
