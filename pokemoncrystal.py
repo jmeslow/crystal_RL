@@ -104,10 +104,10 @@ class crystalenv(Env):
 
     #TODO create health observation space and introduce it into reward calculation
     def get_health(self):
-        cur_array = [self.read_mem(x) + self.read_mem(x-1) * 256 for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
-        total_health = [max(self.read_mem(x) + self.read_mem(x-1) * 256,1) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
+        cur_health = [self.read_mem(x) + self.read_mem(x-1) * 256 for x in [0xDD02,0xDD32,0xDD62,0xDD92,0xDDC2]]
+        total_health = [max(self.read_mem(x) + self.read_mem(x-1) * 256,0) for x in [0xDD04,0xDD34,0xDD64,0xDD94,0xDDC4,0xDDF4]]
         # Return health proportion as single value
-        return sum(cur_array) / sum(total_health)
+        return sum(cur_health) / max(sum(total_health),1)
 
     def get_level_sum(self):
         min_poke_level = 2
