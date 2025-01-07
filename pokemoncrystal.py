@@ -141,12 +141,12 @@ class crystalenv(Env):
         return np.sin(value * 2 ** np.arange(8))
     
     def get_screen(self):
-        pixels = self.pyboy.screen.ndarray[:,:,0:1] # Just copies first color channel (alpha channel?)
+        pixels = self.pyboy.screen.ndarray[:,:,:] # Just copies first color channel (alpha channel?)
         #down sample screen by 1/2, maybe look into using tilemaps here instead of copying the entire screen
         
-        #TODO maybe look into other resizing options for optimatization?
+        #TODO maybe look into other resizing options for optimization?
         # Attempted to resize image and obs. space by 1/8 but got a tensor error
-        pixels = downscale_local_mean(pixels,(2,2,1)).astype(np.uint8)
+        pixels = downscale_local_mean(pixels,(2,2,4)).astype(np.uint8)
         return pixels
     
     def update_recent_screens(self,screen):
