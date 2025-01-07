@@ -89,10 +89,10 @@ class crystalenv(Env):
     def update_reward(self):
         #TODO add other rewards
         scores = {
-            "level" : self.get_level_sum(),
-            "health": self.get_health(),
-            "coord_explore":0.1 * self.get_coord_reward(),
-            "gym_badges":10 * sum(self.get_gym_badges())
+            "level" : 0.5 * self.get_level_sum(),
+            "health": 0.5 * self.get_health(),
+            "coord_explore":0.025 * self.get_coord_reward(),
+            "gym_badges":0.5 * 10 * sum(self.get_gym_badges())
         }
         return sum([val for _,val in scores.items()])
 
