@@ -16,8 +16,8 @@ class crystalenv(Env):
             WindowEvent.PRESS_ARROW_RIGHT,
             WindowEvent.PRESS_ARROW_UP,
             WindowEvent.PRESS_BUTTON_A,
-            WindowEvent.PRESS_BUTTON_B,
-            WindowEvent.PRESS_BUTTON_START
+            WindowEvent.PRESS_BUTTON_B
+            #WindowEvent.PRESS_BUTTON_START
         ]
 
         self.release_actions = [
@@ -26,8 +26,8 @@ class crystalenv(Env):
             WindowEvent.RELEASE_ARROW_RIGHT,
             WindowEvent.RELEASE_ARROW_UP,
             WindowEvent.RELEASE_BUTTON_A,
-            WindowEvent.RELEASE_BUTTON_B,
-            WindowEvent.RELEASE_BUTTON_START
+            WindowEvent.RELEASE_BUTTON_B
+            #WindowEvent.RELEASE_BUTTON_START
         ]   
 
         self.action_space = spaces.Discrete(len(self.valid_actions))
